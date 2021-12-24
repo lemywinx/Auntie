@@ -1,10 +1,21 @@
 #!/usr/bin/env python3
 
 import asyncio
+from getch import _Getch 
 
-async def tcp_echo_client(message):
+getchar = _Getch()
+
+async def character_grab():
+    while True:
+        c = getchar()
+        print (c)
+        if c == '\x03':
+            break
+        reply = await tcp_echo_client(c)
+
+async def tcp_echo_client(message: str):
     reader, writer = await asyncio.open_connection(
-        '127.0.0.1', 8888)
+        '192.168.7.113', 8888)
 
     print(f'Send: {message!r}')
     writer.write(message.encode())
@@ -13,8 +24,9 @@ async def tcp_echo_client(message):
     data = await reader.read(100)
     print(f'Received: {data.decode()!r}')
 
-    print('Close the connection')
     writer.close()
     await writer.wait_closed()
 
-asyncio.run(tcp_echo_client('Hello World!'))
+#asyncio.run(tcp_echo_client(character_grab()))
+asyncio.run(character_grab())
+
