@@ -41,6 +41,8 @@ async def handle_echo(reader, writer):
         #await writer.drain()
 
         writer.close()
+    except:
+        pass
 
 async def main():
     server = await asyncio.start_server(handle_echo, '0.0.0.0', 26969)
