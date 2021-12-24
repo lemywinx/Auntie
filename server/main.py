@@ -1,24 +1,48 @@
 #!/usr/bin/env python3
 
 import asyncio
+import json
+from pprint import pprint
+
+GAME_BOARD = [
+    ['_','_','_','_','_','_','_','_','_','_'],
+    ['_','_','_','_','_','_','_','_','_','_'],
+    ['_','_','_','_','_','_','_','_','_','_'],
+    ['_','_','_','_','_','_','_','_','_','_'],
+    ['_','_','_','_','_','_','_','_','_','_'],
+    ['_','_','_','_','_','_','_','_','_','_'],
+    ['_','_','_','_','_','_','_','_','_','_'],
+    ['_','_','_','_','_','_','_','_','_','_'],
+    ['_','_','_','_','_','_','_','_','_','_'],
+    ['_','_','_','_','_','_','_','_','_','_'],
+    ['_','_','_','_','_','_','_','_','_','_'],
+]
+
+player_position = [0, 0]
 
 async def handle_echo(reader, writer):
     data = await reader.read(100)
     message = data.decode()
-    addr = writer.get_extra_info('peername')
+    parsed = json.loads(message)
 
-    print(f"Received {message!r} from {addr!r}")
+    #addr = writer.get_extra_info('peername')
+    #print(parsed)
 
-    print(f"Send: {message!r}")
-    writer.write(data)
-    await writer.drain()
+    x = parsed["command"]["move"]
+    GAME_BOARD[player_position[1]][player_position[0]] = ' '
+    player_position[0] += x[0]
+    player_position[1] += x[1]
+    GAME_BOARD[player_position[1]][player_position[0]] = '@'
 
-    print("Close the connection")
+    print("\n".join(["".join(row) for row in GAME_BOARD]))
+
+    #writer.write(data)
+    #await writer.drain()
+
     writer.close()
 
 async def main():
-    server = await asyncio.start_server(
-        handle_echo, '127.0.0.1', 8888)
+    server = await asyncio.start_server(handle_echo, '0.0.0.0', 26969)
 
     addrs = ', '.join(str(sock.getsockname()) for sock in server.sockets)
     print(f'Serving on {addrs}')
